@@ -1,0 +1,175 @@
+[
+    {
+        "id": "8432e40c.5ed7c8",
+        "type": "twitter in",
+        "z": "fa9416a7.5d8b18",
+        "twitter": "",
+        "tags": "#boltiot",
+        "user": "false",
+        "name": "Check Tweet",
+        "topic": "tweets",
+        "inputs": 0,
+        "x": 270,
+        "y": 340,
+        "wires": [
+            [
+                "f97279df.591088"
+            ]
+        ]
+    },
+    {
+        "id": "7caf63f2.1d612c",
+        "type": "debug",
+        "z": "fa9416a7.5d8b18",
+        "name": "Read Tweet",
+        "active": false,
+        "console": "false",
+        "complete": "payload",
+        "x": 850,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "f97279df.591088",
+        "type": "function",
+        "z": "fa9416a7.5d8b18",
+        "name": "Parse tweet",
+        "func": "m = msg.payload;\nm = m.toLowerCase();\nkeywords = [\n    \"evil\", \n    \"loving\", \n    \"peaceful\", \n    \"harmless\", \n    \"sleepy\"\n]\n\n//index of #boltiot\nindex = m.search(\"#boltiot\");\nif(index == -1){\n    return;\n}\n//Find keyword\ni_found = -1;\n\nfor(i=0; i < keywords.length; i++){\n    index = m.search(keywords[i]);\n    console.log(\"index is\",index)\n    if(index != -1){\n        i_found = i;\n        break;\n    }\n}\nconsole.log(\"i found is\",i_found);\nif(index == -1){\n    return;\n}\nelse{\n    //check if i_found is hot index\n    console.log(\"***************\");\n    console.log(keywords[i_found]);\n    console.log(\"****************\");\n    msg.action = i_found;\n}\n//Full tweet\nconsole.log(msg);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 390,
+        "y": 440,
+        "wires": [
+            [
+                "15684360.62ba4d"
+            ]
+        ]
+    },
+    {
+        "id": "15684360.62ba4d",
+        "type": "function",
+        "z": "fa9416a7.5d8b18",
+        "name": "Action",
+        "func": "keywords = [\n    \"evil\", \n    \"loving\", \n    \"peaceful\", \n    \"harmless\", \n    \"sleepy\"\n]\n// msg.headers = {};\nmsg.pins = '1,2,3,4';\nmsg.deviceName = 'BOLT1339293';\n\nmsg.tweet.in_reply_to_status_id = msg.tweet.id;\nmsg.tweet.in_reply_to_status_id_str = msg.tweet.id_str;\nmsg.tweet.in_reply_to_user_id = msg.tweet.user.id;\nmsg.tweet.in_reply_to_user_id_str = msg.tweet.user.id_str;\nmsg.tweet.in_reply_to_screen_name = msg.tweet.user.screen_name;\n\nconsole.log(\"Action\");\nswitch(msg.action){\n    case 0: \n        console.log(\"Evil!\");\n        msg.states = 'LOW,LOW,HIGH,LOW';\n        break;\n    case 1:\n        console.log(\"Loving\")\n        msg.states = 'HIGH,LOW,LOW,LOW';\n        break;\n    case 2:\n        console.log(\"Peaceful\");\n        msg.states = 'LOW,LOW,LOW,HIGH';\n        break;\n    case 3:\n        console.log(\"Harmless\");\n        msg.states = 'LOW,HIGH,LOW,LOW';\n        break;    \n    case 4:\n        console.log(\"Sleepy\");\n        msg.states = 'LOW,LOW,LOW,LOW';\n        break;\n    // default:\n        // Handle default safely?\n}\nmsg.payload = \"@\"+ msg.tweet.user.screen_name + \" Look at you, you made me \" + keywords[msg.action]+\"! Muahahahaha Happy Halloween! Bolt IoT Platform http://crowdfunding.boltiot.com/\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 530,
+        "y": 340,
+        "wires": [
+            [
+                "7caf63f2.1d612c",
+                "8150a608.0c1dd8",
+                "e5d24773.4f3048",
+                "8fffb162.6d74e"
+            ]
+        ]
+    },
+    {
+        "id": "8150a608.0c1dd8",
+        "type": "http request",
+        "z": "fa9416a7.5d8b18",
+        "name": "Bolt LED Control",
+        "method": "GET",
+        "ret": "txt",
+        "url": "http://cloud.boltiot.com/remote/cdece468-2906-471c-90d6-2cb860c8a01b/digitalMultiWrite?pins={{pins}}&states={{states}}&deviceName={{deviceName}}",
+        "tls": "",
+        "x": 750,
+        "y": 280,
+        "wires": [
+            [
+                "7caf63f2.1d612c"
+            ]
+        ]
+    },
+    {
+        "id": "e5d24773.4f3048",
+        "type": "delay",
+        "z": "fa9416a7.5d8b18",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "20",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 420,
+        "y": 160,
+        "wires": [
+            [
+                "6df29735.e1b058"
+            ]
+        ]
+    },
+    {
+        "id": "3e391bd7.102104",
+        "type": "twitter out",
+        "z": "fa9416a7.5d8b18",
+        "twitter": "",
+        "name": "Tweet",
+        "x": 850,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "bd752e7f.350d",
+        "type": "debug",
+        "z": "fa9416a7.5d8b18",
+        "name": "",
+        "active": false,
+        "console": "false",
+        "complete": "false",
+        "x": 850,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "6df29735.e1b058",
+        "type": "function",
+        "z": "fa9416a7.5d8b18",
+        "name": "turn_off",
+        "func": "states=msg.states.split(',');\nfor(var i=0;i<states.length;i++){\n    if(states[i]=='HIGH'){\n        msg.pins=(i+1).toString();\n        msg.states='LOW';\n    }\n}\n\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 600,
+        "y": 100,
+        "wires": [
+            [
+                "bd752e7f.350d",
+                "8150a608.0c1dd8"
+            ]
+        ]
+    },
+    {
+        "id": "8fffb162.6d74e",
+        "type": "function",
+        "z": "fa9416a7.5d8b18",
+        "name": "Counter",
+        "func": "count = context.get('count')||0;\ncount++;\ncontext.get('count', count);\nconsole.log(count);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 690,
+        "y": 540,
+        "wires": [
+            [
+                "3e391bd7.102104",
+                "b313fbf3.c07dc8"
+            ]
+        ]
+    },
+    {
+        "id": "b313fbf3.c07dc8",
+        "type": "debug",
+        "z": "fa9416a7.5d8b18",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "false",
+        "x": 820,
+        "y": 660,
+        "wires": []
+    }
+]
